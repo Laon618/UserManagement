@@ -78,7 +78,7 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 			system("cls");
 			printf("4. 회원 수정하기\n\n");
 			result = searchData(userInfo, user_count);
-			if (result != -1) updateData(userInfo, result);
+			if (result != -1) updateData(userInfo, result, user_count);
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == '5')
@@ -141,7 +141,7 @@ void deleteData(UserInfo userInfo [], int i)
 	}
 }
 
-void updateData(UserInfo userInfo [], int i)
+void updateData(UserInfo userInfo [], int i, int count)
 {
 	char methodChoice;
 	char searchInfo[256] = { 0 };
@@ -172,8 +172,8 @@ void updateData(UserInfo userInfo [], int i)
 		fflush(stdin);
 	}
 	else if (methodChoice == '3')
-		printf("수정하실 연락처를 입력해주세요\n");
-		cellphoneFormCheck(userInfo, i);
+		printf("수정하실 연락처를 입력해주세요(숫자만 입력해주세요)\n");
+		cellphoneFormCheck(userInfo, count, i);
 	printf("수정이 완료되었습니다!\n");
 }
 
@@ -188,11 +188,11 @@ void insertMember(UserInfo userInfo [], int count)
 	scanf(" %[^\n]", userInfo[count].userAddress);
 	fflush(stdin);
 	printf("추가할 회원의 연락처는? (숫자만 입력해주세요)\n");
-	cellphoneFormCheck(userInfo, count);
+	cellphoneFormCheck(userInfo, count, count);
 	printf("회원 추가가 완료되었습니다!\n");
 }
 
-void cellphoneFormCheck(UserInfo userInfo[], int count)
+void cellphoneFormCheck(UserInfo userInfo[], int count,int input)
 {
 	int i;
 	int result= -1;
@@ -216,16 +216,16 @@ void cellphoneFormCheck(UserInfo userInfo[], int count)
 		}	
 		for (i = 0; i < 11; i++)
 		{
-			userInfo[count].userCellphone[j] = tempCellphone[i];
+			userInfo[input].userCellphone[j] = tempCellphone[i];
 			j++;
 			if (i == 2 || i == 6)
 			{
-				userInfo[count].userCellphone[j] = '-';
+				userInfo[input].userCellphone[j] = '-';
 				j++;
 			}
 		}
-		userInfo[count].userCellphone[j] = '\0';
-		result = duplicationCheck(userInfo, count);
+		userInfo[input].userCellphone[j] = '\0';
+		result = duplicationCheck(userInfo, count, input);
 		if (result == -1)
 			printf("중복되는 연락처입니다. \n다시 입력해주세요.\n");
 		else break;
@@ -251,15 +251,15 @@ void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone[])
 
 
 
-int duplicationCheck(UserInfo userInfo[], int count)
+int duplicationCheck(UserInfo userInfo[], int count, int input)
 {
 	int result, i;
 	for (i = 0; i < count; i++)
 	{
-		result = strcmp(userInfo[count].userCellphone, userInfo[i].userCellphone);
+		result = strcmp(userInfo[input].userCellphone, userInfo[i].userCellphone);
 		if (result == 0)
 		{
-			if (userInfo[i].userId < 0) continue;
+			if (userInfo[i].userId < 0 || i==input) continue;
 			return -1;
 		}
 	}
