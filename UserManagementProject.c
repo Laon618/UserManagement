@@ -46,7 +46,8 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 			printf("3. 회원 검색하기\n");
 			printf("4. 회원 수정하기\n");
 			printf("5. 회원 삭제하기\n");
-			printf("6. 저장하고 종료\n");
+			printf("6. 저장하기\n");
+			printf("7. 종료하기\n");
 			scanf_s("%c", &userChoice, 1);
 			fflush(stdin);
 		}
@@ -91,13 +92,23 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 		}
 		else if (userChoice == '6')
 		{
+			system("cls");
 			printfData(userInfo, writeFile, user_count);
-			fclose(readFile);
+			printf("저장이 완료되엇습니다\n");
+			userChoice = backToMenu(userChoice);
+		}
+		else if (userChoice == '7')
+		{
+			endProgram(userChoice, userInfo, user_count, readFile, writeFile);
 			break;
 		}
 		else
 		{
 			userChoice = incorrectInput();
+		}
+		if (user_count % 50 == 49)
+		{
+			
 		}
 	}
 }
@@ -249,8 +260,6 @@ void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone[])
 	userInfo[input].userCellphone[j] = '\0';
 }
 
-
-
 int duplicationCheck(UserInfo userInfo[], int count, int input)
 {
 	int result, i;
@@ -301,8 +310,6 @@ int initData(UserInfo userInfo[], FILE* fp)
 	return count;
 }
 
-
-
 void printfData(UserInfo userInfo [], FILE *writeFile, int count)
 {
 	int i;
@@ -327,9 +334,7 @@ int searchData(UserInfo userInfo[], int count)
 	while (1)
 	{
 		if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
-		{
 			methodChoice = incorrectInput();
-		}
 		else break;
 	}
 	system("cls");
@@ -394,4 +399,30 @@ int searchData(UserInfo userInfo[], int count)
 		printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
 		return i;
 	}
+}
+
+
+void endProgram(char userChoice, UserInfo userInfo[], int user_count, FILE *readFile, FILE *writeFile)
+{
+	char methodChoice;
+	system("cls");
+	printf("7. 종료하기\n\n");
+	printf("종료하기전에 저장하시겠습니까?\n");
+	printf("1. 예\n2. 아니요\n");
+	scanf("%c", &methodChoice);
+	fflush(stdin);
+	while (1)
+	{
+		if (methodChoice != '1' && methodChoice != '2')
+			methodChoice = incorrectInput();
+		else break;
+	}
+	if (methodChoice == '1')
+	{
+		printfData(userInfo, writeFile, user_count);
+		printf("저장하고 종료합니다.\n");
+	}
+	else if (methodChoice == '2')
+		printf("저장하지 않고 종료합니다.\n");
+	fclose(readFile);
 }

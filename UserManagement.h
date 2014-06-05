@@ -22,5 +22,6 @@ char backToMenu(char userChoice);
 int duplicationCheck(UserInfo userInfo [], int count, int input);
 char incorrectInput(void);
 void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone []);
+void endProgram(char userChoice, UserInfo userInfo [], int user_count, FILE *readFile, FILE *writeFile);
 
 #endif
