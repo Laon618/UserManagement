@@ -3,8 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
+#include <conio.h>
 #pragma warning(disable:4996)
 #define USER_COUNT 50
+
+
 
 int main(void)
 {
@@ -12,7 +15,7 @@ int main(void)
 	FILE *readFile;
 	FILE *writeFile;
 	int user_count;
-	char userChoice='0';
+	char userChoice = '0';
 	int result=0;
 	readFile = fopen("data.txt", "rt");
 	if (readFile == NULL)
@@ -48,7 +51,8 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 			printf("5. 회원 삭제하기\n");
 			printf("6. 저장하기\n");
 			printf("7. 종료하기\n");
-			scanf_s("%c", &userChoice, 1);
+			userChoice = getche();
+			
 			fflush(stdin);
 		}
 
@@ -71,7 +75,19 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 		{
 			system("cls");
 			printf("3. 회원 검색하기\n\n");
-			result = searchData(userInfo, user_count);
+			char more;
+			while(1)
+			{
+				result = searchData(userInfo, user_count);
+				printf("더 검색하시겠습니까?\n");
+				printf("1. 예\n2. 아니요\n");
+				more = getche();
+				fflush(stdin);
+				if (more != '1'&& more != '2')
+					more = incorrectInput();
+				else if (more == '2') break;
+				system("cls");
+			}
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == '4')
@@ -118,7 +134,7 @@ char backToMenu(char userChoice)
 	while (1)
 	{
 		printf("\n메뉴로 돌아가려면 0을 눌러주세요\n");
-		scanf("%c", &userChoice);
+		userChoice = getche();
 		fflush(stdin);
 		if (userChoice == '0')
 			return userChoice;
@@ -130,7 +146,7 @@ void deleteData(UserInfo userInfo [], int i)
 	char choice;
 	printf("이 회원을 정말 삭제하시겠습니까?\n");
 	printf("1. 예 \n2. 아니요\n");
-	scanf("%c", &choice);
+	choice = getche();
 	fflush(stdin);
 	while (1)
 	{
@@ -158,7 +174,7 @@ void updateData(UserInfo userInfo [], int i, int count)
 	char searchInfo[256] = { 0 };
 
 	printf("1. 이름 수정\n2. 주소 수정\n3. 연락처 수정\n");
-	scanf("%c", &methodChoice);
+	methodChoice = getche();
 	fflush(stdin);
 	while (1)
 	{
@@ -278,8 +294,8 @@ int duplicationCheck(UserInfo userInfo[], int count, int input)
 char incorrectInput(void)
 {
 	char choice;
-	printf("올바른 입력이 아닙니다.\n 다시 입력해주세요\n");
-	scanf("%c", &choice);
+	printf("\n올바른 입력이 아닙니다.\n 다시 입력해주세요\n");
+	choice = getche();
 	fflush(stdin);
 	return choice;
 }
@@ -287,18 +303,25 @@ char incorrectInput(void)
 void showData(UserInfo userInfo [], int count)
 {
 	int i;
-	printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+	printf("\n    Id\t\t이름\t\t주소\t\t    연락처\n");
 	for (i = 0; i < count; i++)
 	{
 		if (userInfo[i].userId < 0) continue;
-		printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
+		gotoxy(5, 4 + i);
+		printf("%d", userInfo[i].userId);
+		gotoxy(15, 4 + i);
+		printf("%s", userInfo[i].userName);
+		gotoxy(25, 4 + i);
+		printf("%s", userInfo[i].userAddress);
+		gotoxy(52, 4 + i);
+		printf("%s", userInfo[i].userCellphone);
 	}
 }
 
 
 int initData(UserInfo userInfo[], FILE* fp)
 {
-	int count = 1;
+	int count = 0;
 	char buffer[256] = { 0 };
 	int i = 0;
 	while ((fgets(buffer, sizeof(buffer), fp)) != NULL)
@@ -313,9 +336,8 @@ int initData(UserInfo userInfo[], FILE* fp)
 void printfData(UserInfo userInfo [], FILE *writeFile, int count)
 {
 	int i;
-
-	fprintf(writeFile, "%s""회원아이디\t 회원이름\t 회원주소\t 연락처\n");
-	for (i = 1; i < count; i++)
+	fprintf(writeFile," 회원 아이디\t 회원 이름\t 회원 주소\t 연락처\n");
+	for (i = 0; i < count; i++)
 	{
 		if (userInfo[i].userId < 0)continue;
 		fprintf(writeFile, "%d\t%s\t%s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
@@ -328,77 +350,77 @@ int searchData(UserInfo userInfo[], int count)
 	int searchId;
 	int i, result;
 	char searchInfo[256] = { 0 };
-	printf("1. Id로 찾기\n2. 이름으로 찾기\n3. 연락처로 찾기\n");
-	scanf("%c", &methodChoice);
-	fflush(stdin);
-	while (1)
-	{
-		if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
-			methodChoice = incorrectInput();
-		else break;
-	}
-	system("cls");
-	if (methodChoice == '1')
-	{
-		printf("찾으실 ID를 입력해주세요\n");
-		scanf("%d", &searchId);
+		printf("1. Id로 찾기\n2. 이름으로 찾기\n3. 연락처로 찾기\n");
+		methodChoice = getche();
 		fflush(stdin);
 		while (1)
 		{
-			if (searchId < 0)
-			{
-				printf("ID가 올바르지 않습니다.\n다시 입력해주세요.\n");
-				scanf("%d", &searchId);
-				fflush(stdin);
-			}
+			if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
+				methodChoice = incorrectInput();
 			else break;
 		}
-		for (i = 0; i < count; i++)
+		system("cls");
+		if (methodChoice == '1')
 		{
-			if (userInfo[i].userId == searchId) break;
+			printf("찾으실 ID를 입력해주세요\n");
+			scanf("%d", &searchId);
+			fflush(stdin);
+			while (1)
+			{
+				if (searchId < 0)
+				{
+					printf("ID가 올바르지 않습니다.\n다시 입력해주세요.\n");
+					scanf("%d", &searchId);
+					fflush(stdin);
+				}
+				else break;
+			}
+			for (i = 0; i < count; i++)
+			{
+				if (userInfo[i].userId == searchId) break;
+			}
+			if (i == count) i = -1;
 		}
-		if (i == count) i = -1;
-	}
-	else if (methodChoice == '2')
-	{
-		printf("찾으실 이름를 입력해주세요\n");
-		scanf("%s", searchInfo);
-		fflush(stdin);
-		for (i = 0; i < count; i++)
+		else if (methodChoice == '2')
 		{
-			if (userInfo[i].userId < 0) continue;
-			result = strcmp(searchInfo, userInfo[i].userName);
-			if (result == 0) break;
-		}
-		if (i == count) i = -1;
-	}
-	else if (methodChoice == '3')
-	{
-		printf("찾으실 연락처를 입력해주세요\n");
-		scanf("%s", searchInfo);
-		fflush(stdin);
-		for (i = 0; i < count; i++)
-		{
-			result = strcmp(searchInfo, userInfo[i].userCellphone);
-			if (result == 0)
+			printf("찾으실 이름를 입력해주세요\n");
+			scanf("%s", searchInfo);
+			fflush(stdin);
+			for (i = 0; i < count; i++)
 			{
 				if (userInfo[i].userId < 0) continue;
-				break;
+				result = strcmp(searchInfo, userInfo[i].userName);
+				if (result == 0) break;
 			}
+			if (i == count) i = -1;
 		}
-		if (i == count) i = -1;
-	}
-	if (i == -1)
-	{
-		printf("찾으시는 회원이 존재하지 않습니다.\n");
-		return -1;
-	}
-	else
-	{
-		printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
-		printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
-		return i;
-	}
+		else if (methodChoice == '3')
+		{
+			printf("찾으실 연락처를 입력해주세요\n");
+			scanf("%s", searchInfo);
+			fflush(stdin);
+			for (i = 0; i < count; i++)
+			{
+				result = strcmp(searchInfo, userInfo[i].userCellphone);
+				if (result == 0)
+				{
+					if (userInfo[i].userId < 0) continue;
+					break;
+				}
+			}
+			if (i == count) i = -1;
+		}
+		if (i == -1)
+		{
+			printf("찾으시는 회원이 존재하지 않습니다.\n");
+			return -1;
+		}
+		else
+		{
+			printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+			printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
+			return i;
+		}
 }
 
 
@@ -409,7 +431,7 @@ void endProgram(char userChoice, UserInfo userInfo[], int user_count, FILE *read
 	printf("7. 종료하기\n\n");
 	printf("종료하기전에 저장하시겠습니까?\n");
 	printf("1. 예\n2. 아니요\n");
-	scanf("%c", &methodChoice);
+	methodChoice = getche();
 	fflush(stdin);
 	while (1)
 	{
@@ -425,4 +447,11 @@ void endProgram(char userChoice, UserInfo userInfo[], int user_count, FILE *read
 	else if (methodChoice == '2')
 		printf("저장하지 않고 종료합니다.\n");
 	fclose(readFile);
+}
+
+
+void gotoxy(int x, int y)
+{
+	COORD Pos = { x - 1, y - 1 };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
 }
