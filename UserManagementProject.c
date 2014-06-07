@@ -208,12 +208,24 @@ void insertMember(UserInfo userInfo [], int count)
 {
 
 	userInfo[count].userId = (141100 + count);
-	printf("추가할 회원의 이름은?\n");
-	scanf("%s", userInfo[count].userName);
-	fflush(stdin);
-	printf("추가할 회원의 주소는?\n");
-	scanf(" %[^\n]", userInfo[count].userAddress);
-	fflush(stdin);
+	while (1)
+	{
+		printf("추가할 회원의 이름은?\n");
+		scanf("%s", userInfo[count].userName);
+		fflush(stdin);
+		if (strlen(userInfo[count].userName) >= 30)
+			printf("이름이 너무 깁니다. \n다시 입력해주세요.\n");
+		else break;
+	}
+	while (1)
+	{
+		printf("추가할 회원의 주소는?\n");
+		scanf(" %[^\n]", userInfo[count].userAddress);
+		fflush(stdin);
+		if (strlen(userInfo[count].userAddress) >= 128)
+			printf("주소가 너무 깁니다. \n다시 입력해주세요.\n");
+		else break;
+	}
 	printf("추가할 회원의 연락처는? (숫자만 입력해주세요)\n");
 	cellphoneFormCheck(userInfo, count, count);
 	printf("회원 추가가 완료되었습니다!\n");
@@ -376,9 +388,7 @@ int searchData(UserInfo userInfo[], int count)
 				else break;
 			}
 			for (i = 0; i < count; i++)
-			{
 				if (userInfo[i].userId == searchId) break;
-			}
 			if (i == count) i = -1;
 		}
 		else if (methodChoice == '2')
@@ -448,7 +458,6 @@ void endProgram(char userChoice, UserInfo userInfo[], int user_count, FILE *read
 		printf("저장하지 않고 종료합니다.\n");
 	fclose(readFile);
 }
-
 
 void gotoxy(int x, int y)
 {
