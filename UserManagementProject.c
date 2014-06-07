@@ -31,68 +31,101 @@ int main(void)
 		return -1;
 	}
 	user_count= initData(userInfo, readFile);
+
+	int maxID;
+	maxID = findMaxId(userInfo, user_count);
 	
-	userManagement(userChoice, userInfo, user_count, result, readFile, writeFile);
+	userManagement(userChoice, userInfo, user_count, result, readFile, writeFile, maxID);
 
 	return 0;
 }
-void userManagement(char userChoice, UserInfo userInfo[], int user_count, int result, FILE *readFile, FILE *writeFile)
+
+int findMaxId(UserInfo userInfo [], int user_count)
+{
+	int i;
+	int maxID = 0;
+	for (i = 0; i < user_count; i++)
+	{
+		if (userInfo[i].userId >= maxID)
+			maxID = userInfo[i].userId;
+	}
+	return maxID;
+}
+void userManagement(char userChoice, UserInfo userInfo[], int user_count, int result, FILE *readFile, FILE *writeFile, int maxID)
 {
 	while (1)
 	{
 		if (userChoice == '0')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("회원정보관리 시스템\n");
+			gotoxy(31, 7);
 			printf("1. 회원 목록 보기\n");
+			gotoxy(31, 9);
 			printf("2. 회원 추가하기\n");
+			gotoxy(31, 11);
 			printf("3. 회원 검색하기\n");
+			gotoxy(31, 13);
 			printf("4. 회원 수정하기\n");
+			gotoxy(31, 15);
 			printf("5. 회원 삭제하기\n");
+			gotoxy(31, 17);
 			printf("6. 저장하기\n");
+			gotoxy(31, 19);
 			printf("7. 종료하기\n");
-			userChoice = getche();
-			
-			fflush(stdin);
+			userChoice = UserChoice();
 		}
 
 		if (userChoice == '1')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("1. 회원 목록 보기\n");
 			showData(userInfo, user_count);
-			userChoice = backToMenu(userChoice);
+			userChoice = '0';
 		}
 		else if (userChoice == '2')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("2. 회원 추가하기\n\n");
-			insertMember(userInfo, user_count);
+			maxID = insertMember(userInfo, user_count, maxID);
 			user_count++;
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == '3')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("3. 회원 검색하기\n\n");
-			char more;
-			while(1)
+			char more= '1';
+			while (more == '1')
 			{
+				clearExceptHeadline();
 				result = searchData(userInfo, user_count);
-				printf("더 검색하시겠습니까?\n");
-				printf("1. 예\n2. 아니요\n");
-				more = getche();
-				fflush(stdin);
-				if (more != '1'&& more != '2')
-					more = incorrectInput();
-				else if (more == '2') break;
-				system("cls");
+				if (result == -1)
+				{
+					gotoxy(26, 17);
+					printf("다시 검색하시겠습니까?\n");
+					gotoxy(28, 18);
+					printf("1. 예   2. 아니요\n");
+					more = UserChoice();
+					if (more != '1'&& more != '2')
+					{
+						IncorrectInput();
+						more = UserChoice();
+					}
+					else if (more == '2') break;
+				}
+				else break;
 			}
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == '4')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("4. 회원 수정하기\n\n");
 			result = searchData(userInfo, user_count);
 			if (result != -1) updateData(userInfo, result, user_count);
@@ -101,6 +134,7 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 		else if (userChoice == '5')
 		{
 			system("cls");
+			gotoxy(30, 2);
 			printf("5. 회원 삭제하기\n\n");
 			result = searchData(userInfo, user_count);
 			if (result != -1) deleteData(userInfo, result);
@@ -109,18 +143,25 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 		else if (userChoice == '6')
 		{
 			system("cls");
+			gotoxy(30, 2);
+			printf("6. 저장하기\n");
 			printfData(userInfo, writeFile, user_count);
-			printf("저장이 완료되엇습니다\n");
+			gotoxy(27, 12);
+			printf("저장이 완료되었습니다!\n");
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == '7')
 		{
+			system("cls");
+			gotoxy(30, 2);
+			printf("7. 종료하기\n\n");
 			endProgram(userChoice, userInfo, user_count, readFile, writeFile);
 			break;
 		}
 		else
 		{
-			userChoice = incorrectInput();
+			IncorrectInput();
+			userChoice = UserChoice();
 		}
 		if (user_count % 50 == 49)
 		{
@@ -131,25 +172,34 @@ void userManagement(char userChoice, UserInfo userInfo[], int user_count, int re
 
 char backToMenu(char userChoice)
 {
+	gotoxy(25, 24);
+	printf("\t\t\t\t");
+	gotoxy(23, 23);
+	printf("메뉴로 돌아가려면 0을 눌러주세요 ");
 	while (1)
 	{
-		printf("\n메뉴로 돌아가려면 0을 눌러주세요\n");
-		userChoice = getche();
-		fflush(stdin);
+		userChoice = getch();
 		if (userChoice == '0')
 			return userChoice;
+		else
+		{
+			IncorrectInput();
+			gotoxy(56, 23);
+		}
 	}
 }
 
 void deleteData(UserInfo userInfo [], int i)
 {
 	char choice;
-	printf("이 회원을 정말 삭제하시겠습니까?\n");
-	printf("1. 예 \n2. 아니요\n");
-	choice = getche();
-	fflush(stdin);
+	gotoxy(23, 9);
+	printf("이 회원을 정말 삭제하시겠습니까?");
+	gotoxy(30, 11);
+	printf("1. 예   2. 아니요");
+	choice = UserChoice();
 	while (1)
 	{
+		gotoxy(27, 19);
 		if (choice == '1')
 		{
 			userInfo[i].userId = -1;
@@ -163,7 +213,8 @@ void deleteData(UserInfo userInfo [], int i)
 		}
 		else
 		{
-			choice = incorrectInput();
+			IncorrectInput();
+			choice = UserChoice();
 		}
 	}
 }
@@ -173,108 +224,161 @@ void updateData(UserInfo userInfo [], int i, int count)
 	char methodChoice;
 	char searchInfo[256] = { 0 };
 
-	printf("1. 이름 수정\n2. 주소 수정\n3. 연락처 수정\n");
-	methodChoice = getche();
-	fflush(stdin);
+	gotoxy(31, 13);
+	printf("1. 이름 수정");
+	gotoxy(31, 15);
+	printf("2. 주소 수정");
+	gotoxy(31, 17);
+	printf("3. 연락처 수정");
+	methodChoice = UserChoice();
 	while (1)
 	{
 		if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
 		{
-			methodChoice = incorrectInput();
+			IncorrectInput();
+			methodChoice = UserChoice();
 		}
 		else break;
 	}
-	system("cls");
-	printf("4. 회원 수정하기\n\n");
+	clearExceptHeadline();
+	gotoxy(1, 6);
+	printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+	printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
 	if (methodChoice == '1')
 	{
-		printf("수정하실 이름를 입력해주세요\n");
-		scanf("%s", userInfo[i].userName);
-		fflush(stdin);
+		while (1)
+		{
+			gotoxy(30, 11);
+			printf("\t\t\t\t\t\t\t");
+			gotoxy(30, 11);
+			printf("이 름 : ");
+			scanf("%s", userInfo[i].userName);
+			fflush(stdin);
+			if (strlen(userInfo[i].userName) >= 30)
+				IncorrectInput();
+			else break;
+		}
 	}
 	else if (methodChoice == '2')
 	{
-		printf("수정하실 주소를 입력해주세요\n");
-		scanf(" %[^\n]", userInfo[i].userAddress);
-		fflush(stdin);
+		while (1)
+		{
+			gotoxy(30, 11);
+			printf("\t\t\t\t\t\t\t");
+			gotoxy(30, 11);
+			printf("주 소 : ");
+			scanf("%[^\n]", userInfo[i].userAddress);
+			fflush(stdin);
+			if (strlen(userInfo[i].userAddress) >= 128)
+				IncorrectInput();
+			else break;
+		}
 	}
 	else if (methodChoice == '3')
-		printf("수정하실 연락처를 입력해주세요(숫자만 입력해주세요)\n");
-		cellphoneFormCheck(userInfo, count, i);
+	{
+		int result = 0;
+		char tempCellphone[30];
+		while (1)
+		{
+			gotoxy(10, 9);
+			printf("\t\t\t\t\t\t\t");
+			gotoxy(10, 9);
+			printf("연락처 ('-'를 제외한 숫자만 넣어주세요.) : ");
+			scanf("%s", tempCellphone);
+			fflush(stdin);
+			result = cellphoneFormCheck(userInfo, count, i, tempCellphone);
+			if (result == -1)
+			{
+				IncorrectInput();
+				continue;
+			}
+			else if (result == 0)
+				duplicationCheck(userInfo, count, i);
+			if (result == -1)
+			{
+				IncorrectInput();
+				continue;
+			}
+			else if (result == 0) break;
+		}
+	}
+	gotoxy(27, 19);
 	printf("수정이 완료되었습니다!\n");
 }
 
-void insertMember(UserInfo userInfo [], int count)
+int insertMember(UserInfo userInfo [], int count, int maxID)
 {
 
-	userInfo[count].userId = (141100 + count);
+	userInfo[count].userId = maxID+1;
+	maxID += 1;
+
 	while (1)
 	{
-		printf("추가할 회원의 이름은?\n");
+		gotoxy(10, 5);
+		printf("\t\t\t\t\t\t\t");
+		gotoxy(10, 5);
+		printf("이 름 : ");
 		scanf("%s", userInfo[count].userName);
 		fflush(stdin);
 		if (strlen(userInfo[count].userName) >= 30)
-			printf("이름이 너무 깁니다. \n다시 입력해주세요.\n");
+			IncorrectInput();
 		else break;
 	}
 	while (1)
 	{
-		printf("추가할 회원의 주소는?\n");
+		gotoxy(10, 7);
+		printf("\t\t\t\t\t\t\t");
+		gotoxy(10, 7);
+		printf("주 소 : ");
 		scanf(" %[^\n]", userInfo[count].userAddress);
 		fflush(stdin);
 		if (strlen(userInfo[count].userAddress) >= 128)
-			printf("주소가 너무 깁니다. \n다시 입력해주세요.\n");
+			IncorrectInput();
 		else break;
 	}
-	printf("추가할 회원의 연락처는? (숫자만 입력해주세요)\n");
-	cellphoneFormCheck(userInfo, count, count);
-	printf("회원 추가가 완료되었습니다!\n");
-}
-
-void cellphoneFormCheck(UserInfo userInfo[], int count,int input)
-{
-	int i;
-	int result= -1;
+	int result = 0;
 	char tempCellphone[30];
-	while (result == -1)
+	while (1)
 	{
-		int j = 0;
-		while (1)
-		{
-			scanf("%s", tempCellphone);
-			fflush(stdin);
-			for (i = 0; i < 11; i++)
-			{
-				if (tempCellphone[i]<48 || tempCellphone[i]>57 || strlen(tempCellphone)>11)
-				{
-					printf("형식이 올바르지 않습니다! 다시 입력해주세요!\n");
-					break;
-				}
-			}
-			if (i == 11) break;
-		}	
-		for (i = 0; i < 11; i++)
-		{
-			userInfo[input].userCellphone[j] = tempCellphone[i];
-			j++;
-			if (i == 2 || i == 6)
-			{
-				userInfo[input].userCellphone[j] = '-';
-				j++;
-			}
-		}
-		userInfo[input].userCellphone[j] = '\0';
-		result = duplicationCheck(userInfo, count, input);
+		gotoxy(10, 9);
+		printf("\t\t\t\t\t\t\t");
+		gotoxy(10, 9);
+		printf("연락처 ('-'를 제외한 숫자만 넣어주세요.): ");
+		scanf("%s", tempCellphone);
+		fflush(stdin);
+		result = cellphoneFormCheck(userInfo, count, count, tempCellphone);
 		if (result == -1)
-			printf("중복되는 연락처입니다. \n다시 입력해주세요.\n");
-		else break;
+		{
+			IncorrectInput();
+			continue;
+		}
+		else if (result == 0)
+			result = duplicationCheck(userInfo, count, count);
+		if (result == -1)
+		{
+			IncorrectInput();
+			continue;
+		}
+		else if (result == 0) break;
+
 	}
+	gotoxy(27, 19);
+	printf("회원 추가가 완료되었습니다!\n");
+
+	return maxID;
 }
 
-void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone[])
+int cellphoneFormCheck(UserInfo userInfo[], int count, int input, char tempCellphone[])
 {
 	int i;
 	int j = 0;
+
+	if (strlen(tempCellphone) != 11) return -1;
+	for (i = 0; i < 11; i++)
+	{
+		if (tempCellphone[i]<48 || tempCellphone[i]>57) return -1;
+	}
+
 	for (i = 0; i < 11; i++)
 	{
 		userInfo[input].userCellphone[j] = tempCellphone[i];
@@ -286,6 +390,8 @@ void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone[])
 		}
 	}
 	userInfo[input].userCellphone[j] = '\0';
+
+	return 0;
 }
 
 int duplicationCheck(UserInfo userInfo[], int count, int input)
@@ -303,30 +409,77 @@ int duplicationCheck(UserInfo userInfo[], int count, int input)
 	return 0;
 }
 
-char incorrectInput(void)
+void IncorrectInput(void)
 {
-	char choice;
-	printf("\n올바른 입력이 아닙니다.\n 다시 입력해주세요\n");
-	choice = getche();
-	fflush(stdin);
-	return choice;
+	gotoxy(25, 24);
+	printf("\t\t\t\t");
+	Sleep(100);
+	gotoxy(25, 24);
+	printf("올바른 입력이 아닙니다!");
 }
 
 void showData(UserInfo userInfo [], int count)
 {
-	int i;
-	printf("\n    Id\t\t이름\t\t주소\t\t    연락처\n");
-	for (i = 0; i < count; i++)
+	int i=0;
+	int line = 0;
+	char choice;
+	int pages = (count / 16)+1;
+	int pageCount = 1;
+	while(1)
 	{
-		if (userInfo[i].userId < 0) continue;
-		gotoxy(5, 4 + i);
-		printf("%d", userInfo[i].userId);
-		gotoxy(15, 4 + i);
-		printf("%s", userInfo[i].userName);
-		gotoxy(25, 4 + i);
-		printf("%s", userInfo[i].userAddress);
-		gotoxy(52, 4 + i);
-		printf("%s", userInfo[i].userCellphone);
+		clearExceptHeadline();
+		gotoxy(1, 4);
+		printf("    Id\t\t이름\t\t주소\t\t    연락처\n");
+		line = 0;
+		for (; i < 16*pageCount; i++)
+		{
+			if (userInfo[i].userId < 0) continue;
+			gotoxy(5, 5 + line);
+			printf("%d", userInfo[i].userId);
+			gotoxy(15, 5 + line);
+			printf("%s", userInfo[i].userName);
+			gotoxy(25, 5 + line);
+			printf("%s", userInfo[i].userAddress);
+			gotoxy(52, 5 + line);
+			printf("%s", userInfo[i].userCellphone);
+			line++;
+		}
+		gotoxy(1, 22);
+		printf("1. 이전 페이지");
+		gotoxy(35, 22);
+		printf("%d / %d", pageCount, pages);
+		gotoxy(60, 22);
+		printf("2. 다음 페이지");
+		gotoxy(23, 23);
+		printf("메뉴로 돌아가려면 0을 눌러주세요 ");
+		while (1)
+		{
+			gotoxy(56, 23);
+			choice = getch();
+			if (choice == '1')
+			{
+				if (pageCount > 1)
+				{
+					pageCount--;
+					i -= 32;
+					break;
+				}
+				else IncorrectInput();
+			}
+			else if (choice == '2')
+			{
+				if (pageCount < pages)
+				{
+					pageCount++;
+					break;
+				}
+				else IncorrectInput();
+			}
+			else if (choice == '0')
+				return;
+			else
+				IncorrectInput();
+		}
 	}
 }
 
@@ -356,111 +509,150 @@ void printfData(UserInfo userInfo [], FILE *writeFile, int count)
 	}
 }
 
-int searchData(UserInfo userInfo[], int count)
+int searchData(UserInfo userInfo [], int count)
 {
 	char methodChoice;
 	int searchId;
 	int i, result;
 	char searchInfo[256] = { 0 };
-		printf("1. Id로 찾기\n2. 이름으로 찾기\n3. 연락처로 찾기\n");
-		methodChoice = getche();
-		fflush(stdin);
+	gotoxy(31, 9);
+	printf("1. Id로 찾기");
+	gotoxy(31, 11);
+	printf("2. 이름으로 찾기");
+	gotoxy(31, 13);
+	printf("3. 연락처로 찾기");
+	methodChoice = UserChoice();
+	while (1)
+	{
+		if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
+		{
+			IncorrectInput();
+			methodChoice = UserChoice();
+		}
+		else break;
+	}
+	clearExceptHeadline();
+	if (methodChoice == '1')
+	{
 		while (1)
 		{
-			if (methodChoice != '1' && methodChoice != '2' &&methodChoice != '3')
-				methodChoice = incorrectInput();
-			else break;
-		}
-		system("cls");
-		if (methodChoice == '1')
-		{
-			printf("찾으실 ID를 입력해주세요\n");
+			gotoxy(30, 11);
+			printf("\t\t\t\t\t\t\t");
+			gotoxy(30, 11);
+			printf("I D : ");
 			scanf("%d", &searchId);
 			fflush(stdin);
-			while (1)
-			{
-				if (searchId < 0)
-				{
-					printf("ID가 올바르지 않습니다.\n다시 입력해주세요.\n");
-					scanf("%d", &searchId);
-					fflush(stdin);
-				}
-				else break;
-			}
-			for (i = 0; i < count; i++)
-				if (userInfo[i].userId == searchId) break;
-			if (i == count) i = -1;
+			if (searchId < 0)
+				IncorrectInput();
+			else break;
 		}
-		else if (methodChoice == '2')
+		for (i = 0; i < count; i++)
+			if (userInfo[i].userId == searchId) break;
+		if (i == count) i = -1;
+	}
+	else if (methodChoice == '2')
+	{
+		gotoxy(30, 11);
+		printf("\t\t\t\t\t\t\t");
+		gotoxy(30, 11);
+		printf("이 름 : ");
+		scanf("%s", searchInfo);
+		fflush(stdin);
+		for (i = 0; i < count; i++)
 		{
-			printf("찾으실 이름를 입력해주세요\n");
-			scanf("%s", searchInfo);
-			fflush(stdin);
-			for (i = 0; i < count; i++)
+			if (userInfo[i].userId < 0) continue;
+			result = strcmp(searchInfo, userInfo[i].userName);
+			if (result == 0) break;
+		}
+		if (i == count) i = -1;
+	}
+	else if (methodChoice == '3')
+	{
+		gotoxy(30, 11);
+		printf("\t\t\t\t\t\t\t");
+		gotoxy(30, 11);
+		printf("연락처 : ");
+		scanf("%s", searchInfo);
+		fflush(stdin);
+		for (i = 0; i < count; i++)
+		{
+			result = strcmp(searchInfo, userInfo[i].userCellphone);
+			if (result == 0)
 			{
 				if (userInfo[i].userId < 0) continue;
-				result = strcmp(searchInfo, userInfo[i].userName);
-				if (result == 0) break;
+				break;
 			}
-			if (i == count) i = -1;
 		}
-		else if (methodChoice == '3')
-		{
-			printf("찾으실 연락처를 입력해주세요\n");
-			scanf("%s", searchInfo);
-			fflush(stdin);
-			for (i = 0; i < count; i++)
-			{
-				result = strcmp(searchInfo, userInfo[i].userCellphone);
-				if (result == 0)
-				{
-					if (userInfo[i].userId < 0) continue;
-					break;
-				}
-			}
-			if (i == count) i = -1;
-		}
-		if (i == -1)
-		{
-			printf("찾으시는 회원이 존재하지 않습니다.\n");
-			return -1;
-		}
-		else
-		{
-			printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
-			printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
-			return i;
-		}
+		if (i == count) i = -1;
+	}
+	if (i == -1)
+	{
+		gotoxy(22, 15);
+		printf("찾으시는 회원이 존재하지 않습니다.\n");
+		return -1;
+	}
+	else
+	{
+		clearExceptHeadline();
+		gotoxy(1, 6);
+		printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+		printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
+		return i;
+	}
 }
 
 
 void endProgram(char userChoice, UserInfo userInfo[], int user_count, FILE *readFile, FILE *writeFile)
 {
 	char methodChoice;
-	system("cls");
-	printf("7. 종료하기\n\n");
-	printf("종료하기전에 저장하시겠습니까?\n");
-	printf("1. 예\n2. 아니요\n");
-	methodChoice = getche();
-	fflush(stdin);
+	gotoxy(23, 9);
+	printf("종료하기전에 저장하시겠습니까?");
+	gotoxy(30, 11);
+	printf("1. 예   2. 아니요");
+	methodChoice = UserChoice();
 	while (1)
 	{
 		if (methodChoice != '1' && methodChoice != '2')
-			methodChoice = incorrectInput();
+		{
+			IncorrectInput();
+			methodChoice = UserChoice();
+		}
 		else break;
 	}
 	if (methodChoice == '1')
 	{
 		printfData(userInfo, writeFile, user_count);
-		printf("저장하고 종료합니다.\n");
+		gotoxy(26, 15);
+		printf("저장하고 종료합니다.");
 	}
 	else if (methodChoice == '2')
-		printf("저장하지 않고 종료합니다.\n");
+	{
+		gotoxy(27, 15);
+		printf("저장하지 않고 종료합니다.");
+	}
 	fclose(readFile);
+	gotoxy(20, 25);
 }
 
 void gotoxy(int x, int y)
 {
 	COORD Pos = { x - 1, y - 1 };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+}
+
+char UserChoice(void)
+{
+	int choice;
+	gotoxy(23, 23);
+	printf("원하는 기능을 입력해주세요 : ");
+	choice = getch();
+	return choice;
+}
+
+void clearExceptHeadline(void)
+{
+	int i;
+	gotoxy(1, 3);
+	for (i = 0; i < 22; i++)
+		printf("\t\t\t\t\t\t\t\t\n");
 }

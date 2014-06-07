@@ -14,15 +14,18 @@ int initData(UserInfo userInfo [], FILE* fp);
 void setUserInfo(char buffer [], UserInfo *userInfo);
 void printfData(UserInfo userInfo [], FILE *writeFile, int count);
 void showData(UserInfo userInfo [], int count);
-void insertMember(UserInfo userInfo [], int count);
+int insertMember(UserInfo userInfo [], int count, int maxID);
 int searchData(UserInfo userInfo [], int count);
 void updateData(UserInfo userInfo[], int i, int user_count);
-void cellphoneFormCheck(UserInfo userInfo[], int count, int input);
-void userManagement(char userChoice, UserInfo userInfo [], int user_count, int result, FILE *readFile, FILE *writeFile);
+int cellphoneFormCheck(UserInfo userInfo [], int count, int input, char tempCellphone []);
+void userManagement(char userChoice, UserInfo userInfo [], int user_count, int result, FILE *readFile, FILE *writeFile, int maxID);
 char backToMenu(char userChoice);
 int duplicationCheck(UserInfo userInfo [], int count, int input);
-char incorrectInput(void);
 void cellphoneInput(UserInfo userInfo [], int input, char tempCellphone []);
 void endProgram(char userChoice, UserInfo userInfo [], int user_count, FILE *readFile, FILE *writeFile);
+int findMaxId(UserInfo userInfo [], int user_count);
+char UserChoice(void);
+void IncorrectInput(void);
+void clearExceptHeadline(void);
 
 #endif
