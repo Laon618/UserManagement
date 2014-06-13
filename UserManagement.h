@@ -15,7 +15,7 @@ void setUserInfo(char buffer [], UserInfo *userInfo);
 void printfData(UserInfo userInfo [], FILE *writeFile, int count);
 void showData(UserInfo userInfo [], int count);
 int insertMember(UserInfo userInfo [], int count, int maxID);
-int searchData(UserInfo userInfo [], int count);
+void searchData(UserInfo userInfo [], int count, int *searchResult);
 void updateData(UserInfo userInfo[], int i, int user_count);
 int cellphoneFormCheck(UserInfo userInfo [], int count, int input, char tempCellphone []);
 void userManagement(int userChoice, UserInfo userInfo[], int user_count, int result, FILE *readFile, FILE *writeFile, int maxID);
@@ -28,5 +28,8 @@ int UserChoice(void);
 void IncorrectInput(void);
 void clearScreenPartially(int x, int y);
 void clearExceptBottomLine(int x, int y);
+void color(int colorNumber);
+int seleteData(int searchResult [], UserInfo userInfo []);
+void showChosenData(UserInfo userInfo [], int i, int line, int y);
 
 #endif

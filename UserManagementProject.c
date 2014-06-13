@@ -54,8 +54,12 @@ int findMaxId(UserInfo userInfo [], int user_count)
 	}
 	return maxID;
 }
+
+
+
 void userManagement(int userChoice, UserInfo userInfo[], int user_count, int result, FILE *readFile, FILE *writeFile, int maxID)
 {
+	int searchResult[50] = { 0 };
 	while (1)
 	{
 		if (userChoice == 13)
@@ -104,9 +108,23 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			printf("3. 회원 검색하기\n\n");
 			char more= '1';
 			clearScreenPartially(1, 3);
-			result = searchData(userInfo, user_count);
-			if (result != -1)
+			searchData(userInfo, user_count, searchResult);
+
+			if (searchResult[0] != 0)
+			{
+				int line = 0;
+				int j;
+				int i;
+				gotoxy(1, 6);
+				printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+				for (j = 0; searchResult[j] != 0; j++)
+				{
+					i = searchResult[j];
+					showChosenData(userInfo, i, line, 7);
+					line++;
+				}
 				userChoice = backToMenu(userChoice);
+			}
 			else
 				userChoice = 13;
 		}
@@ -115,13 +133,16 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			system("cls");
 			gotoxy(30, 2);
 			printf("4. 회원 수정하기\n\n");
-			result = searchData(userInfo, user_count);
-			if (result == -1)
+			searchData(userInfo, user_count, searchResult);
+			if (searchResult[0] != 0)
+				result = seleteData(searchResult, userInfo);
+			else
 			{
 				userChoice = 13;
 				continue;
 			}
-			else updateData(userInfo, result, user_count);
+			clearScreenPartially(1, 13);
+			updateData(userInfo, result, user_count);
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == 53)
@@ -129,13 +150,15 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			system("cls");
 			gotoxy(30, 2);
 			printf("5. 회원 삭제하기\n\n");
-			result = searchData(userInfo, user_count);
-			if (result == -1)
+			searchData(userInfo, user_count, searchResult);
+			if (searchResult[0] != 0)
+				result = seleteData(searchResult, userInfo);
+			else
 			{
 				userChoice = 13;
 				continue;
 			}
-			else deleteData(userInfo, result);
+			deleteData(userInfo, result);
 			userChoice = backToMenu(userChoice);
 		}
 		else if (userChoice == 54)
@@ -161,7 +184,7 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			IncorrectInput();
 			userChoice = UserChoice();
 		}
-
+		memset(searchResult, 0, sizeof(searchResult));
 		if (user_count % USER_SIZE == (USER_SIZE-1))
 		{
 			USER_SIZE *= 2;
@@ -242,7 +265,7 @@ void updateData(UserInfo userInfo [], int i, int count)
 	clearScreenPartially(1, 3);
 	gotoxy(1, 6);
 	printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
-	printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
+	showChosenData(userInfo, i, 0, 7);
 	if (methodChoice == '1')
 	{
 		clearScreenPartially(30, 11);
@@ -426,14 +449,7 @@ void showData(UserInfo userInfo [], int count)
 		for (; i < 16*pageCount; i++)
 		{
 			if (userInfo[i].userId < 0) continue;
-			gotoxy(5, 5 + line);
-			printf("%d", userInfo[i].userId);
-			gotoxy(15, 5 + line);
-			printf("%s", userInfo[i].userName);
-			gotoxy(25, 5 + line);
-			printf("%s", userInfo[i].userAddress);
-			gotoxy(52, 5 + line);
-			printf("%s", userInfo[i].userCellphone);
+			showChosenData(userInfo, i, line, 5);
 			line++;
 		}
 		gotoxy(1, 22);
@@ -508,11 +524,14 @@ void printfData(UserInfo userInfo [], FILE *writeFile, int count)
 	}
 }
 
-int searchData(UserInfo userInfo [], int count)
+
+
+void searchData(UserInfo userInfo [], int count, int *searchResult)
 {
 	int methodChoice;
 	int searchId;
 	int i, result;
+	int resultCount = 0;
 	char searchInfo[256] = { 0 };
 	gotoxy(31, 9);
 	printf("1. Id로 찾기");
@@ -547,8 +566,11 @@ int searchData(UserInfo userInfo [], int count)
 			else break;
 		}
 		for (i = 0; i < count; i++)
-			if (userInfo[i].userId == searchId) break;
-		if (i == count) i = -1;
+		if (userInfo[i].userId == searchId)
+		{
+			searchResult[resultCount] = i;
+			resultCount++;
+		}
 	}
 	else if (methodChoice == 50)
 	{
@@ -560,9 +582,12 @@ int searchData(UserInfo userInfo [], int count)
 		{
 			if (userInfo[i].userId < 0) continue;
 			result = strcmp(searchInfo, userInfo[i].userName);
-			if (result == 0) break;
+			if (result == 0) 
+			{
+				searchResult[resultCount] = i;
+				resultCount++;
+			}
 		}
-		if (i == count) i = -1;
 	}
 	else if (methodChoice == 51)
 	{
@@ -572,20 +597,16 @@ int searchData(UserInfo userInfo [], int count)
 		fflush(stdin);
 		for (i = 0; i < count; i++)
 		{
+			if (userInfo[i].userId < 0) continue;
 			result = strcmp(searchInfo, userInfo[i].userCellphone);
 			if (result == 0)
-			{
-				if (userInfo[i].userId < 0) continue;
-				break;
-			}
+				searchResult[resultCount] = i;
 		}
-		if (i == count) i = -1;
 	}
 	else if (methodChoice == 13)
-		return -1;
-	if (i == -1)
+		return;
+	if (searchResult[0] == 0)
 	{
-
 		int more;
 		clearScreenPartially(22, 15);
 		printf("찾으시는 회원이 존재하지 않습니다.\n");
@@ -596,13 +617,11 @@ int searchData(UserInfo userInfo [], int count)
 		more = UserChoice();
 		while (1)
 		{
-			if (more == 50) return -1;
+			if (more == 50) return;
 			else if (more == 49)
 			{
-				int result;
 				clearScreenPartially(1, 3);
-				result = searchData(userInfo, count);
-				return result;
+				searchData(userInfo, count, searchResult);
 			}
 			else
 			{
@@ -611,14 +630,7 @@ int searchData(UserInfo userInfo [], int count)
 			}
 		}
 	}
-	else
-	{
-		clearScreenPartially(1,3);
-		gotoxy(1, 6);
-		printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
-		printf("	%d\t%s\t%2s\t%s\n", userInfo[i].userId, userInfo[i].userName, userInfo[i].userAddress, userInfo[i].userCellphone);
-		return i;
-	}
+	clearScreenPartially(1, 3);
 }
 
 
@@ -685,4 +697,91 @@ void clearExceptBottomLine(int x, int y)
 	for (i = y; i < 24; i++)
 		printf("\t\t\t\t\t\t\t\t\t        ");
 	gotoxy(x, y);
+}
+
+void showChosenData(UserInfo userInfo[], int i, int line, int y)
+{
+	gotoxy(5, y + line);
+	printf("%d", userInfo[i].userId);
+	gotoxy(15, y + line);
+	printf("%s", userInfo[i].userName);
+	gotoxy(25, y + line);
+	printf("%s", userInfo[i].userAddress);
+	gotoxy(52, y + line);
+	printf("%s", userInfo[i].userCellphone);
+}
+
+int seleteData(int *searchResult, UserInfo userInfo[])
+{
+	int j;
+	int i = 0;
+	int chosenData = 0;
+	int choice;
+	gotoxy(1, 6);
+	printf("	Id\t 이름\t\t 주소\t\t 연락처\n");
+	if (searchResult[0] == 0)
+		return 13;
+	if (searchResult[1] == 0)
+	{
+		i = searchResult[0];
+		showChosenData(userInfo, i, 0, 7);
+		return searchResult[0];
+	}
+	else
+	{
+		while (1)
+		{
+			int line = 0;
+			for (j = 0; searchResult[j] != 0; j++)
+			{
+				if (j == chosenData)
+					color(112);
+				i = searchResult[j];
+				showChosenData(userInfo, i, line, 7);
+				line++;
+				color(7);
+			}
+			gotoxy(15, 23);
+			printf("상하화살표를 이용하여 원하는 회원을 선택해주세요 ");
+			while (1)
+			{
+				gotoxy(1, 24);
+				printf("\t\t\t\t\t\t\t\t\t");
+				gotoxy(60, 23);
+				choice = getch();
+				if (choice == 0 || choice == 0xe0)
+				{
+					choice = getch();
+					if (choice == 72)
+					{
+						if (chosenData > 0)
+						{
+							chosenData--;
+							break;
+						}
+					}
+
+					if (choice == 80)
+					{
+						if (searchResult[chosenData+1] != 0)
+						{
+							chosenData++;
+							break;
+						}
+					}
+				}
+				if (choice == 72 || choice == 80)
+					continue;
+				else if (choice == 13)
+					return searchResult[chosenData];
+				else
+					IncorrectInput();
+			}
+		}
+	}
+}
+
+void color(int colorNumber)
+{
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), colorNumber);
 }
