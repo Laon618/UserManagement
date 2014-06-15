@@ -29,7 +29,7 @@ void IncorrectInput(void);
 void clearScreenPartially(int x, int y);
 void clearExceptBottomLine(int x, int y);
 void color(int colorNumber);
-int seleteData(int searchResult [], UserInfo userInfo []);
+int selectData(int searchResult [], UserInfo userInfo []);
 void showChosenData(UserInfo userInfo [], int i, int line, int y);
 
 #endif

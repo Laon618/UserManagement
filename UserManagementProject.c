@@ -135,7 +135,7 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			printf("4. 회원 수정하기\n\n");
 			searchData(userInfo, user_count, searchResult);
 			if (searchResult[0] != 0)
-				result = seleteData(searchResult, userInfo);
+				result = selectData(searchResult, userInfo);
 			else
 			{
 				userChoice = 13;
@@ -152,7 +152,7 @@ void userManagement(int userChoice, UserInfo userInfo[], int user_count, int res
 			printf("5. 회원 삭제하기\n\n");
 			searchData(userInfo, user_count, searchResult);
 			if (searchResult[0] != 0)
-				result = seleteData(searchResult, userInfo);
+				result = selectData(searchResult, userInfo);
 			else
 			{
 				userChoice = 13;
@@ -711,7 +711,7 @@ void showChosenData(UserInfo userInfo[], int i, int line, int y)
 	printf("%s", userInfo[i].userCellphone);
 }
 
-int seleteData(int *searchResult, UserInfo userInfo[])
+int selectData(int *searchResult, UserInfo userInfo[])
 {
 	int j;
 	int i = 0;
